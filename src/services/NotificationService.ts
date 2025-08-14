@@ -22,7 +22,7 @@ export class NotificationService {
       icon: this.getIconPath(),
       sound: this.soundEnabled,
       wait: true,
-      timeout: 10,
+      timeout: false, // 自動削除を無効化、ユーザーが手動で削除
       actions: ['View on GitHub', 'Dismiss'],
     }, (err: any, response: any, metadata: any) => {
       if (err) {
@@ -68,7 +68,7 @@ export class NotificationService {
       message: error,
       icon: this.getIconPath(),
       sound: false,
-      timeout: 5,
+      timeout: false, // エラー通知も手動削除に変更
     });
   }
 
@@ -78,7 +78,7 @@ export class NotificationService {
       message: 'Notification test successful! The app is working correctly.',
       icon: this.getIconPath(),
       sound: this.soundEnabled,
-      timeout: 5,
+      timeout: false, // テスト通知も手動削除に変更
     });
   }
 }
