@@ -1,6 +1,6 @@
-# Claude Code Changelog Notification App
+# Claude Code Changelog Notification Tool
 
-Desktop notification application that monitors the Claude Code CHANGELOG.md file for updates and displays notifications when new versions are released.
+Notification tool for Claude Code CHANGELOG.md updates. Monitor anthropics/claude-code releases and get instant notifications when new versions are available.
 
 ## Features
 
@@ -11,11 +11,15 @@ Desktop notification application that monitors the Claude Code CHANGELOG.md file
 - ⚙️ Settings panel for customization
 - 🌐 Click notifications to open GitHub changelog
 
+## Status
+
+⚠️ **Development Version** - This is currently in development. Packaged releases (`.app`, `.exe`) will be available in the future.
+
 ## Installation
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/camoneart/cc-changelog-notification.git
    cd cc-changelog-notification
    ```
 
@@ -64,9 +68,9 @@ The app stores its configuration in your system's user data directory:
 - `notification.soundEnabled`: Enable/disable notification sounds
 - `notification.pollInterval`: Check interval in minutes (5-120)
 
-## GitHub Token (Optional)
+## GitHub Token (Optional but Recommended)
 
-To avoid GitHub API rate limits, you can provide a Personal Access Token:
+While the tool works without a token (60 API calls/hour), setting up a GitHub token is recommended for stability:
 
 1. Go to [GitHub Settings > Tokens](https://github.com/settings/tokens)
 2. Create a new token with `public_repo` permission
@@ -74,18 +78,7 @@ To avoid GitHub API rate limits, you can provide a Personal Access Token:
 
 ## Building for Distribution
 
-Build the application for your platform:
-
-```bash
-# Build only
-pnpm run build
-
-# Package for current platform
-pnpm run pack
-
-# Build distributable packages
-pnpm run dist
-```
+⚠️ **Note**: Package commands (`pack`, `dist`) are not yet configured. Coming soon!
 
 ## Requirements
 
