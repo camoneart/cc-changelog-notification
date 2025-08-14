@@ -1,9 +1,12 @@
 import * as notifier from 'node-notifier';
 import { ChangelogEntry } from '../types';
 import { shell } from 'electron';
+import { exec } from 'child_process';
+import { promisify } from 'util';
 
 export class NotificationService {
   private soundEnabled: boolean;
+  private execAsync = promisify(exec);
 
   constructor(soundEnabled: boolean = true) {
     this.soundEnabled = soundEnabled;
@@ -20,11 +23,13 @@ export class NotificationService {
       title: `Claude Code ${entry.version} Released!`,
       message,
       icon: this.getIconPath(),
-      sound: this.soundEnabled ? 'Glass' : false,
+      sound: this.soundEnabled ? 'Basso' : false, // Bassoに変更
       wait: true,
       timeout: false, // 自動削除を無効化、ユーザーが手動で削除
       actions: ['View on GitHub', 'Dismiss'],
-    }, (err: any, response: any, metadata: any) => {
+      contentImage: '', // macOS用追加オプション
+      appIcon: '', // macOS用追加オプション
+    } as any, (err: any, response: any, metadata: any) => {
       if (err) {
         console.error('Notification error:', err);
         return;
@@ -73,12 +78,27 @@ export class NotificationService {
   }
 
   async showTestNotification(): Promise<void> {
+    // macOSでterminal-notifierを使用
+    if (process.platform === 'darwin') {
+      try {
+        const soundOption = this.soundEnabled ? '-sound Submarine' : '';
+        await this.execAsync(`terminal-notifier -title "Claude Code Notifier" -message "Notification test successful! The app is working correctly." ${soundOption}`);
+        console.log('✅ terminal-notifier notification sent');
+        return;
+      } catch (error) {
+        console.error('❌ terminal-notifier failed, falling back to node-notifier:', error);
+      }
+    }
+
+    // フォールバック：通常のnode-notifier
     notifier.notify({
       title: 'Claude Code Notifier',
       message: 'Notification test successful! The app is working correctly.',
       icon: this.getIconPath(),
-      sound: this.soundEnabled ? 'Glass' : false,
+      sound: this.soundEnabled ? 'Basso' : false, // Bassoに変更
       timeout: false, // テスト通知も手動削除に変更
-    });
+      contentImage: '', // macOS用追加オプション
+      appIcon: '', // macOS用追加オプション
+    } as any);
   }
 }
