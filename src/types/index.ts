@@ -18,6 +18,8 @@ export interface AppConfig {
     owner: string;
     filePath: string;
   };
+  lastKnownSha?: string;
+  lastCheckTime?: string;
 }
 
 export interface GitHubCommit {
