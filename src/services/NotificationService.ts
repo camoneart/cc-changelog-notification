@@ -46,17 +46,18 @@ export class NotificationService {
   }
 
   private formatChangelogMessage(entry: ChangelogEntry): string {
-    const maxChanges = 3;
+    const maxChanges = 2;
     const changes = entry.changes.slice(0, maxChanges);
     
     if (changes.length === 0) {
       return `New version ${entry.version} is available. Check the changelog for details.`;
     }
 
-    let message = `What's new:\n${changes.join('\n')}`;
+    // 改行を避けて、セミコロンで区切る
+    let message = changes.map(c => c.substring(0, 100)).join('; ');
     
     if (entry.changes.length > maxChanges) {
-      message += `\n... and ${entry.changes.length - maxChanges} more changes`;
+      message += ` ... and ${entry.changes.length - maxChanges} more changes`;
     }
 
     return message;
