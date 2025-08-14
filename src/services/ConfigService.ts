@@ -21,6 +21,7 @@ export class ConfigService {
   constructor() {
     const userDataPath = app.getPath('userData');
     this.configPath = path.join(userDataPath, 'config.json');
+    console.log('📁 Config path:', this.configPath);
   }
 
   async loadConfig(): Promise<AppConfig> {

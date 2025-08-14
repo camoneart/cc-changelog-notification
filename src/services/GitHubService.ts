@@ -1,20 +1,22 @@
 import { Octokit } from '@octokit/rest';
 import { GitHubCommit, ChangelogEntry } from '../types';
+import { ConfigService } from './ConfigService';
 
 export class GitHubService {
   private octokit: Octokit;
   private owner: string;
   private repo: string;
   private filePath: string;
-  private lastKnownSha: string | null = null;
+  private configService: ConfigService;
 
-  constructor(owner: string, repo: string, filePath: string, token?: string) {
+  constructor(owner: string, repo: string, filePath: string, token?: string, configService?: ConfigService) {
     this.octokit = new Octokit({
       auth: token,
     });
     this.owner = owner;
     this.repo = repo;
     this.filePath = filePath;
+    this.configService = configService || new ConfigService();
   }
 
   async getLatestCommit(): Promise<GitHubCommit | null> {
@@ -44,15 +46,21 @@ export class GitHubService {
       return false;
     }
 
-    if (this.lastKnownSha === null) {
-      this.lastKnownSha = latestCommit.sha;
-      return false; // First run, don't notify
-    }
+    const config = await this.configService.loadConfig();
+    const lastKnownSha = config.lastKnownSha;
+    
+    console.log('💾 Last known SHA:', lastKnownSha);
+    console.log('📝 Latest commit SHA:', latestCommit.sha);
 
-    const hasChanged = this.lastKnownSha !== latestCommit.sha;
+    // 初回実行または前回と異なる場合は通知する
+    const hasChanged = !lastKnownSha || lastKnownSha !== latestCommit.sha;
     
     if (hasChanged) {
-      this.lastKnownSha = latestCommit.sha;
+      // 新しいSHAを保存
+      await this.configService.updateConfig({
+        lastKnownSha: latestCommit.sha,
+        lastCheckTime: new Date().toISOString()
+      });
     }
 
     return hasChanged;
@@ -98,7 +106,7 @@ export class GitHubService {
           version,
           date: dateMatch ? dateMatch[1] : new Date().toISOString().split('T')[0],
           changes: [],
-          sha: this.lastKnownSha || '',
+          sha: '',
         };
       } else if (currentEntry && line.trim().startsWith('-')) {
         // Collect bullet points as changes
