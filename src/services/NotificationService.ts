@@ -1,4 +1,4 @@
-import * as notifier from 'node-notifier';
+import notifier from 'node-notifier';
 import { ChangelogEntry } from '../types';
 import { shell } from 'electron';
 import { exec } from 'child_process';
