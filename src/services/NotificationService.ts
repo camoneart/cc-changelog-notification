@@ -20,7 +20,7 @@ export class NotificationService {
       title: `Claude Code ${entry.version} Released!`,
       message,
       icon: this.getIconPath(),
-      sound: this.soundEnabled,
+      sound: this.soundEnabled ? 'Glass' : false,
       wait: true,
       timeout: false, // 自動削除を無効化、ユーザーが手動で削除
       actions: ['View on GitHub', 'Dismiss'],
@@ -77,7 +77,7 @@ export class NotificationService {
       title: 'Claude Code Notifier',
       message: 'Notification test successful! The app is working correctly.',
       icon: this.getIconPath(),
-      sound: this.soundEnabled,
+      sound: this.soundEnabled ? 'Glass' : false,
       timeout: false, // テスト通知も手動削除に変更
     });
   }
