@@ -87,7 +87,7 @@ While the tool works without a token (60 API calls/hour), setting up a GitHub to
 
 ## Monitored Repository
 
-This app monitors: [anthropics/claude-code](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
+This app monitors: [Claude Code CHANGELOG .md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md)
 
 ## License
 
