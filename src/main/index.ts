@@ -1,5 +1,4 @@
-import { app, BrowserWindow, Tray, Menu, nativeImage, ipcMain } from 'electron';
-import * as path from 'path';
+import { app, ipcMain } from 'electron';
 import { GitHubService } from '../services/GitHubService';
 import { NotificationService } from '../services/NotificationService';
 import { ConfigService } from '../services/ConfigService';
@@ -10,8 +9,7 @@ class ChangelogMonitor {
   private notificationService!: NotificationService;
   private configService!: ConfigService;
   private config!: AppConfig;
-  private tray: Tray | null = null;
-  private settingsWindow: BrowserWindow | null = null;
+  // Tray and settings UI disabled due to macOS display issues
   private pollInterval: NodeJS.Timeout | null = null;
 
   async init(): Promise<void> {
@@ -27,41 +25,13 @@ class ChangelogMonitor {
     
     this.notificationService = new NotificationService(this.config.notification.soundEnabled);
     
-    this.createTray();
+    // this.createTray(); // Disabled - macOS tray display issues
     this.setupIPC();
     this.startPolling();
   }
 
-  private createTray(): void {
-    // Create a working icon using a minimal approach
-    const icon = nativeImage.createFromDataURL('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAEklEQVQ4T2NkYGBgGAWjYBQMOwAAA9QAAQGXGnwAAAAASUVORK5CYII=');
-    
-    this.tray = new Tray(icon);
-    this.tray.setToolTip('Claude Code Changelog Monitor');
-    
-    const contextMenu = Menu.buildFromTemplate([
-      {
-        label: 'Check Now',
-        click: () => this.checkForUpdates(),
-      },
-      {
-        label: 'Test Notification',
-        click: () => this.notificationService.showTestNotification(),
-      },
-      { type: 'separator' },
-      {
-        label: 'Settings',
-        click: () => this.openSettings(),
-      },
-      { type: 'separator' },
-      {
-        label: 'Quit',
-        click: () => app.quit(),
-      },
-    ]);
-    
-    this.tray.setContextMenu(contextMenu);
-  }
+  // createTray() method disabled due to macOS display issues
+  // private createTray(): void { ... }
 
   private setupIPC(): void {
     ipcMain.handle('get-config', () => {
@@ -123,93 +93,16 @@ class ChangelogMonitor {
     this.startPolling();
   }
 
-  private openSettings(): void {
-    if (this.settingsWindow) {
-      this.settingsWindow.focus();
-      return;
-    }
-
-    this.settingsWindow = new BrowserWindow({
-      width: 400,
-      height: 500,
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-        preload: path.join(__dirname, '../renderer/preload.js'),
-      },
-      title: 'Claude Code Notifier Settings',
-      resizable: false,
-      show: false,
-    });
-
-    // For now, we'll create a simple settings HTML file
-    const settingsHtml = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Settings</title>
-          <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 20px; }
-            .setting { margin-bottom: 20px; }
-            label { display: block; margin-bottom: 5px; font-weight: 500; }
-            input, select { width: 100%; padding: 8px; margin-bottom: 10px; }
-            button { padding: 10px 20px; margin: 5px; }
-            .buttons { text-align: center; margin-top: 30px; }
-          </style>
-        </head>
-        <body>
-          <h2>Claude Code Notifier Settings</h2>
-          <div class="setting">
-            <label>
-              <input type="checkbox" id="enabled"> Enable notifications
-            </label>
-          </div>
-          <div class="setting">
-            <label>
-              <input type="checkbox" id="soundEnabled"> Enable sound
-            </label>
-          </div>
-          <div class="setting">
-            <label for="pollInterval">Check interval (minutes):</label>
-            <select id="pollInterval">
-              <option value="5">5 minutes</option>
-              <option value="15">15 minutes</option>
-              <option value="30">30 minutes</option>
-              <option value="60">1 hour</option>
-              <option value="120">2 hours</option>
-            </select>
-          </div>
-          <div class="buttons">
-            <button onclick="testNotification()">Test Notification</button>
-            <button onclick="checkNow()">Check Now</button>
-            <button onclick="saveSettings()">Save</button>
-            <button onclick="window.close()">Cancel</button>
-          </div>
-          <script>
-            // Settings will be handled by the preload script
-          </script>
-        </body>
-      </html>
-    `;
-
-    this.settingsWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(settingsHtml)}`);
-    
-    this.settingsWindow.once('ready-to-show', () => {
-      this.settingsWindow?.show();
-    });
-
-    this.settingsWindow.on('closed', () => {
-      this.settingsWindow = null;
-    });
-  }
+  // Settings functionality disabled with tray removal
+  // openSettings method removed - no UI access without tray
 
   cleanup(): void {
     if (this.pollInterval) {
       clearInterval(this.pollInterval);
     }
-    if (this.tray) {
-      this.tray.destroy();
-    }
+    // if (this.tray) {
+    //   this.tray.destroy();
+    // }
   }
 }
 
