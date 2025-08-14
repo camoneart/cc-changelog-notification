@@ -20,7 +20,8 @@ class ChangelogMonitor {
       this.config.github.owner,
       this.config.github.repo,
       this.config.github.filePath,
-      process.env.GITHUB_TOKEN
+      process.env.GITHUB_TOKEN,
+      this.configService
     );
     
     this.notificationService = new NotificationService(this.config.notification.soundEnabled);
@@ -56,13 +57,17 @@ class ChangelogMonitor {
 
   private async checkForUpdates(): Promise<void> {
     try {
+      console.log('🔍 Checking for CHANGELOG.md updates...');
       const hasChanges = await this.githubService.checkForChanges();
+      console.log('📊 Changes detected:', hasChanges);
       
       if (hasChanges && this.config.notification.enabled) {
         const latestVersion = await this.githubService.getLatestVersion();
+        console.log('📦 Latest version:', latestVersion?.version);
         
         if (latestVersion) {
           const githubUrl = this.githubService.getCommitUrl();
+          console.log('🔔 Sending notification for version:', latestVersion.version);
           await this.notificationService.showChangelogNotification(latestVersion, githubUrl);
         }
       }
@@ -86,7 +91,7 @@ class ChangelogMonitor {
     }, intervalMs);
 
     // Check immediately on start
-    setTimeout(() => this.checkForUpdates(), 5000); // Wait 5 seconds after startup
+    setTimeout(() => this.checkForUpdates(), 2000); // Wait 2 seconds after startup
   }
 
   private restartPolling(): void {
