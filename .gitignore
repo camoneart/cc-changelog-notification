@@ -1,0 +1,14 @@
+node_modules/
+dist/
+release/
+.env
+*.log
+.DS_Store
+Thumbs.db
+
+# Electron build artifacts
+out/
+build/
+
+# User data
+config.json

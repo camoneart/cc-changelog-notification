@@ -1,0 +1,51 @@
+{
+  "name": "cc-changelog-notification",
+  "version": "1.0.0",
+  "description": "Desktop notification app for Claude Code CHANGELOG.md updates",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc && electron dist/main/index.js",
+    "start": "electron dist/main/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "electron",
+    "github",
+    "notification",
+    "changelog"
+  ],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.14.0",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/node-notifier": "^8.0.5",
+    "electron": "^28.0.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "@octokit/rest": "^20.0.0",
+    "node-notifier": "^10.0.0"
+  },
+  "build": {
+    "appId": "com.example.cc-changelog-notification",
+    "productName": "Claude Code Changelog Notifier",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}
