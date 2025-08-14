@@ -91,4 +91,4 @@ This app monitors: [anthropics/claude-code](https://github.com/anthropics/claude
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
