@@ -6,7 +6,7 @@ Notification tool for Claude Code CHANGELOG.md updates. Monitor anthropics/claud
 
 - 🔔 Desktop notifications for new Claude Code releases
 - ⏰ Configurable polling intervals (5 minutes to 2 hours)
-- 🔊 Optional notification sounds
+- 🔊 Optional notification sounds (Submarine sound on macOS)
 - 📋 System tray integration
 - ⚙️ Settings panel for customization
 - 🌐 Click notifications to open GitHub changelog
@@ -84,6 +84,7 @@ While the tool works without a token (60 API calls/hour), setting up a GitHub to
 
 - Node.js 18+
 - pnpm package manager
+- **macOS only**: `terminal-notifier` (automatically installed via Homebrew when running the app)
 
 ## Monitored Repository
 
