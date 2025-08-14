@@ -12,3 +12,6 @@ build/
 
 # User data
 config.json
+
+# memory
+_docs/templates
