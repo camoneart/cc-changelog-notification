@@ -1,4 +1,4 @@
-import { app, ipcMain } from 'electron';
+import { app, ipcMain, Tray, Menu, nativeImage, shell } from 'electron';
 import { GitHubService } from '../services/GitHubService';
 import { NotificationService } from '../services/NotificationService';
 import { ConfigService } from '../services/ConfigService';
@@ -9,7 +9,7 @@ class ChangelogMonitor {
   private notificationService!: NotificationService;
   private configService!: ConfigService;
   private config!: AppConfig;
-  // Tray and settings UI disabled due to macOS display issues
+  private tray: Tray | null = null;
   private pollInterval: NodeJS.Timeout | null = null;
 
   async init(): Promise<void> {
@@ -26,13 +26,99 @@ class ChangelogMonitor {
     
     this.notificationService = new NotificationService(this.config.notification.soundEnabled);
     
-    // this.createTray(); // Disabled - macOS tray display issues
+    this.createTray();
     this.setupIPC();
     this.startPolling();
   }
 
-  // createTray() method disabled due to macOS display issues
-  // private createTray(): void { ... }
+  private createTray(): void {
+    try {
+      // macOSでは、テキストのみのトレイアイコンを作成
+      if (process.platform === 'darwin') {
+        // macOSではアイコンなしでタイトルのみ表示も可能
+        this.tray = new Tray(nativeImage.createEmpty());
+        this.tray.setTitle('CC'); // メニューバーにテキストを表示
+        console.log('✅ Tray created with text title for macOS');
+      } else {
+        // 他のプラットフォーム用のアイコン
+        const iconBase64 = 'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAA' +
+                          'CXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5wgPBhgAK8ER8AAAAB1pVFh0Q29tbWVudAAA' +
+                          'AAAAQ3JlYXRlZCB3aXRoIEdJTVBkLmUHAAAAdUlEQVQ4y8WTQQrAIAwEZ/tg/7+kPbRQFCQq' +
+                          'LXjZgyCbbJKNAP7KzFARwSmlUsISEW2ttZsxxiGilIrI5r03ABARF1LKFTNfkiQppdBa42it' +
+                          '0VqjtUZrjdYarTVaa7TWaK3hHAAiGgbuvaN5npFSCjHGy9P+AGhXT7Ch8hopAAAAAElFTkSu' +
+                          'QmCC';
+        const icon = nativeImage.createFromDataURL(`data:image/png;base64,${iconBase64}`);
+        this.tray = new Tray(icon);
+        console.log('✅ Tray created with icon');
+      }
+      
+      this.tray.setToolTip('Claude Code Changelog Notifier');
+      this.updateTrayMenu();
+    } catch (error) {
+      console.error('❌ Failed to create tray:', error);
+    }
+  }
+
+  private updateTrayMenu(): void {
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: '🔔 Claude Code Notifier',
+        enabled: false
+      },
+      { type: 'separator' },
+      {
+        label: '🔄 Check for Updates Now',
+        click: () => {
+          console.log('🔍 Manual update check triggered');
+          this.checkForUpdates();
+        }
+      },
+      { type: 'separator' },
+      {
+        label: `🔔 Notifications: ${this.config.notification.enabled ? 'ON' : 'OFF'}`,
+        click: () => {
+          this.config.notification.enabled = !this.config.notification.enabled;
+          this.configService.updateConfig(this.config);
+          this.updateTrayMenu();
+          console.log(`🔔 Notifications ${this.config.notification.enabled ? 'enabled' : 'disabled'}`);
+        }
+      },
+      {
+        label: `🔊 Sound: ${this.config.notification.soundEnabled ? 'ON' : 'OFF'}`,
+        click: () => {
+          this.config.notification.soundEnabled = !this.config.notification.soundEnabled;
+          this.notificationService.setSoundEnabled(this.config.notification.soundEnabled);
+          this.configService.updateConfig(this.config);
+          this.updateTrayMenu();
+          console.log(`🔊 Sound ${this.config.notification.soundEnabled ? 'enabled' : 'disabled'}`);
+        }
+      },
+      { type: 'separator' },
+      {
+        label: '🎯 Test Notification',
+        click: () => {
+          console.log('🎯 Sending test notification');
+          this.notificationService.showTestNotification();
+        }
+      },
+      {
+        label: '🌐 View on GitHub',
+        click: () => {
+          shell.openExternal('https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md');
+        }
+      },
+      { type: 'separator' },
+      {
+        label: '❌ Quit',
+        click: () => {
+          this.cleanup();
+          app.quit();
+        }
+      }
+    ]);
+    
+    this.tray?.setContextMenu(contextMenu);
+  }
 
   private setupIPC(): void {
     ipcMain.handle('get-config', () => {
@@ -105,9 +191,9 @@ class ChangelogMonitor {
     if (this.pollInterval) {
       clearInterval(this.pollInterval);
     }
-    // if (this.tray) {
-    //   this.tray.destroy();
-    // }
+    if (this.tray) {
+      this.tray.destroy();
+    }
   }
 }
 
@@ -115,6 +201,13 @@ class ChangelogMonitor {
 app.whenReady().then(async () => {
   const monitor = new ChangelogMonitor();
   await monitor.init();
+  
+  // macOSでDockアイコンを隠す（メニューバーアプリとして動作）
+  // Tray作成後に実行
+  // 一時的にコメントアウトして、Dockに表示させる
+  // if (process.platform === 'darwin') {
+  //   app.dock.hide();
+  // }
 
   app.on('before-quit', () => {
     monitor.cleanup();
