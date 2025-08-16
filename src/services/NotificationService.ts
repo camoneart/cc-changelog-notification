@@ -19,16 +19,34 @@ export class NotificationService {
   async showChangelogNotification(entry: ChangelogEntry, githubUrl: string): Promise<void> {
     const message = this.formatChangelogMessage(entry);
     
+    // macOSでterminal-notifierを使用
+    if (process.platform === 'darwin') {
+      try {
+        const soundOption = this.soundEnabled ? '-sound Submarine' : '';
+        const escapedMessage = message.replace(/"/g, '\\"').replace(/'/g, "\\'");
+        const escapedTitle = `Claude Code ${entry.version} Released!`.replace(/"/g, '\\"');
+        
+        await this.execAsync(
+          `terminal-notifier -title "${escapedTitle}" -message "${escapedMessage}" -open "${githubUrl}" ${soundOption}`
+        );
+        console.log('✅ Changelog notification sent via terminal-notifier');
+        return;
+      } catch (error) {
+        console.error('❌ terminal-notifier failed, falling back to node-notifier:', error);
+      }
+    }
+    
+    // フォールバック：通常のnode-notifier
     notifier.notify({
       title: `Claude Code ${entry.version} Released!`,
       message,
       icon: this.getIconPath(),
-      sound: this.soundEnabled ? 'Basso' : false, // Bassoに変更
+      sound: this.soundEnabled ? 'Basso' : false,
       wait: true,
-      timeout: false, // 自動削除を無効化、ユーザーが手動で削除
+      timeout: false,
       actions: ['View on GitHub', 'Dismiss'],
-      contentImage: '', // macOS用追加オプション
-      appIcon: '', // macOS用追加オプション
+      contentImage: '',
+      appIcon: '',
     } as any, (err: any, response: any, metadata: any) => {
       if (err) {
         console.error('Notification error:', err);
